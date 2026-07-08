@@ -1,0 +1,6 @@
+# legacy_action: a NATIVE (non-Capa) action. It has a package manifest
+# but ships no .capa source, so Capa cannot derive its authority and must
+# treat it as authority-unknown.
+[package]
+name = "legacy_action"
+version = "2.0.0"

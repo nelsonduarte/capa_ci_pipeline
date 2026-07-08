@@ -1,0 +1,53 @@
+# Organization capability-compliance policies for the CI product.
+#
+# This file is OWNED BY THE ORGANIZATION (security / platform team), not
+# by any single package. It states product-wide rules evaluated over the
+# COMPOSED capability graph under the Wasm-sandbox posture (pass --wasm to
+# --check-policies / --conformance-report so the foreign action
+# boundaries compose as bounded nodes of their declared caps).
+#
+# NOTE on the exclusion below: it is evaluated with over = "attributed",
+# i.e. over each package's OWN, precisely-attributed capabilities. See
+# DOGFOOD_FINDINGS.md finding #1 for why the default over = "composed"
+# view is currently too coarse to scope a rule to a single foreign-action
+# boundary.
+
+# The pure core library must hold no authority. pipeline_core calls no
+# foreign component, so its composed authority is exact and empty.
+[[policy]]
+id = "core-is-pure"
+name = "the pipeline core library holds no authority"
+kind = "purity"
+package = "pipeline_core"
+
+# The exfil-vector rule: the build action must never hold Net AND Fs at
+# once. A build step legitimately needs the filesystem; the moment it
+# also gains the network it can read the checkout (secrets, source) and
+# ship it out. Evaluated over the build action's OWN attributed caps
+# ({Fs} in v1), so it passes clean now and FAILS on the compromised v2
+# build action that gains Net.
+[[policy]]
+id = "build-no-net-and-fs"
+name = "the build action must not hold Net and Fs together"
+kind = "exclusion"
+capabilities = ["Net", "Fs"]
+scope = "build_action"
+over = "attributed"
+
+# No package anywhere in the product may spawn a process. Process
+# execution is never part of this pipeline's threat-model-approved
+# surface, so it is forbidden product-wide.
+[[policy]]
+id = "no-process-spawning"
+name = "no action may spawn a process"
+kind = "forbid-capability"
+capability = "Proc"
+
+# The whole product's composed authority must stay within {Net, Fs,
+# Stdio}. Any package that introduces a capability outside that set fails
+# the gate, naming the offending capability and package.
+[[policy]]
+id = "product-authority"
+name = "product authority subset-or-equal {Net, Fs, Stdio}"
+kind = "product-subset"
+max = ["Net", "Fs", "Stdio"]

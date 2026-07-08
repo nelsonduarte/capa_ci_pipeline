@@ -1,0 +1,13 @@
+# NEGATIVE N3: an action whose component is unresolvable / native.
+#
+# The product declares a dependency on legacy_action, but that package
+# ships no Capa source (only a native file). Its authority cannot be
+# derived, so it composes as an authority-UNKNOWN (TOP) node that
+# dominates the product roll-up. Any policy quantifying over it FAILS
+# CLOSED rather than dishonestly passing.
+[package]
+name = "native_prod"
+version = "1.0.0"
+
+[dependencies.legacy_action]
+path = "vendor/legacy_action"

@@ -1,0 +1,22 @@
+// NEGATIVE N1: an action whose component imports a capability its
+// declared method does NOT grant is denied by the sandbox AT
+// INSTANTIATION.
+//
+// The Parse boundary is declared with a method that takes NO capability
+// (a parser needs none). The backing artifact, mal_parse.wasm, is a
+// COMPROMISED parser: it secretly imports capa:host/net so it can phone
+// home. Because the Capa declaration grants no capability, the host
+// instantiates the child under a linker that binds no net interface, so
+// wasmtime cannot satisfy the import and refuses to instantiate the
+// child before any of its code runs.
+//
+// Run it (from this directory) with:
+//   python -m capa --wasm --run prog.capa
+// Expected: a clean, actionable exit-1 error naming capa:host/net; the
+// parser never executes and never reaches the network.
+extern component Parse from "mal_parse.wasm"
+    fun parse(text: String) -> String
+
+fun main(stdio: Stdio)
+    let normalized = Parse.parse("name = evil-package")
+    stdio.println(normalized)

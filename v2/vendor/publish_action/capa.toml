@@ -1,0 +1,5 @@
+# publish_action: the boundary around the third-party "publish" action.
+# It is granted Net only (to upload the built artifact to the registry).
+[package]
+name = "publish_action"
+version = "1.0.0"

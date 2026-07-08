@@ -1,0 +1,26 @@
+# capa_ci_pipeline: a build/release orchestrator as a multi-package Capa
+# PRODUCT. The root wires a pure core library and four third-party
+# "actions", each a sandbox-confined typed foreign Wasm component granted
+# only the capability it declares.
+#
+# Dependencies are declared as PATH dependencies pointing into vendor/ so
+# the whole product builds, composes, runs, and is policy-checked with no
+# network access and no package-registry step.
+[package]
+name = "capa_ci_pipeline"
+version = "1.0.0"
+
+[dependencies.pipeline_core]
+path = "vendor/pipeline_core"
+
+[dependencies.fetch_action]
+path = "vendor/fetch_action"
+
+[dependencies.parse_action]
+path = "vendor/parse_action"
+
+[dependencies.build_action]
+path = "vendor/build_action"
+
+[dependencies.publish_action]
+path = "vendor/publish_action"

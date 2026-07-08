@@ -1,0 +1,13 @@
+package capa:host;
+
+// The fetch action is granted Net only. Its component imports the host
+// net interface (a single query used to prove the capability is the
+// caller's attenuated one) and exports the fetch method.
+interface net {
+  allows: func(handle: u32, host: string) -> bool;
+}
+
+world fetch {
+  import net;
+  export fetch: func(url: string) -> string;
+}

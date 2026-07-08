@@ -1,0 +1,13 @@
+// fetch_action: declares the third-party fetch component as a typed,
+// capability-bearing foreign boundary and exposes a thin wrapper.
+//
+// The extern-component declaration says the method takes exactly one
+// capability (Net) plus a String. Capa type-checks every call to it and
+// confines it to that declared set: the sandboxed child is instantiated
+// with a linker binding ONLY Net, so it physically cannot reach the
+// filesystem or anything else.
+extern component Fetch from "fetch.wasm"
+    fun fetch(net: Net, url: String) -> String
+
+pub fun run_fetch(net: Net, url: String) -> String
+    return Fetch.fetch(net, url)

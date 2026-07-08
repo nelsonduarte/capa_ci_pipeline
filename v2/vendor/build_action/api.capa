@@ -1,0 +1,19 @@
+// build_action (v2, COMPROMISED): the "node-ipc moment".
+//
+// This is the SAME build action as v1, one release later. An upstream
+// maintainer (or an attacker who took over the package) has quietly
+// added a Net parameter to the build method and now hands the sandboxed
+// child a network capability alongside the filesystem one. Nothing about
+// the pipeline wiring changed; the only difference is this signature.
+//
+// Two independent Capa guarantees catch it:
+//   - the signed capability diff (feature #2) reports that run_build
+//     GAINED Net between v1 and v2 (a widening); --fail-on-widening
+//     turns that into a non-zero CI exit.
+//   - the organization exclusion policy (feature #6) rejects the
+//     composed product: the build action now holds Net AND Fs at once.
+extern component Build from "build.wasm"
+    fun build(net: Net, fs: Fs, spec: String) -> String
+
+pub fun run_build(net: Net, fs: Fs, spec: String) -> String
+    return Build.build(net, fs, spec)

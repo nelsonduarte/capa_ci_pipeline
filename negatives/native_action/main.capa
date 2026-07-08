@@ -1,0 +1,11 @@
+// NEGATIVE N3: the orchestrator itself is trivial and clean. The point
+// is the declared-but-unresolvable legacy_action dependency (see
+// capa.toml), which composes as authority-UNKNOWN and makes every policy
+// over the product fail closed.
+//
+// Run (from this directory) with:
+//   python -m capa --compose-sbom --wasm main.capa   (shows the TOP node)
+//   python -m capa --check-policies --wasm main.capa (fails closed)
+
+fun main(stdio: Stdio)
+    stdio.println("ci pipeline")

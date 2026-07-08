@@ -1,0 +1,5 @@
+# fetch_action: the boundary around the third-party "fetch" action.
+# It is granted Net only (to download the source manifest).
+[package]
+name = "fetch_action"
+version = "1.0.0"

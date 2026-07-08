@@ -1,0 +1,12 @@
+// NEGATIVE N2: an action that holds Net AND Fs at once.
+//
+// deploy takes both the network and the filesystem, exactly the exfil
+// combination the organization forbids: it can read the checkout and
+// ship it out. --check-policies fails and names this package.
+//
+// Run (from this directory) with:
+//   python -m capa --check-policies main.capa
+// Expected: FAILED, naming package 'net_and_fs_action' holding Fs + Net.
+
+pub fun deploy(_net: Net, _fs: Fs) -> Unit
+    return

@@ -1,0 +1,29 @@
+// pipeline_core: pure pipeline/DAG logic. No capability is named
+// anywhere in this file, so every function here is provably pure.
+
+// The fixed ordering of the build/release pipeline stages.
+pub fun stage_count() -> Int
+    return 4
+
+pub fun stage_name(index: Int) -> String
+    return match index
+        0 -> "fetch"
+        1 -> "parse"
+        2 -> "build"
+        3 -> "publish"
+        _ -> "unknown"
+
+// A formatted banner for a stage, used by the orchestrator when it
+// announces each step. Pure string formatting.
+pub fun banner(name: String) -> String
+    return "== stage: ${name} =="
+
+// True when a stage returned an "ok:" status prefix. The orchestrator
+// uses this to decide whether the pipeline succeeded, without holding any
+// authority itself to make that judgement.
+pub fun succeeded(status: String) -> Bool
+    return status.starts_with("ok:")
+
+// Combine two stage outputs into a single provenance string.
+pub fun chain(previous: String, current: String) -> String
+    return "${previous} -> ${current}"

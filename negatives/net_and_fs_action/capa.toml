@@ -1,0 +1,10 @@
+# NEGATIVE N2: a policy-violating configuration.
+#
+# A single-package product whose action holds BOTH Net and Fs, tripping
+# the organization exfil-vector exclusion. The capabilities here are
+# ordinary function parameters (not foreign-boundary caps), so their
+# attribution is exact and the default over = "composed" exclusion view
+# names the offending package precisely.
+[package]
+name = "net_and_fs_action"
+version = "1.0.0"

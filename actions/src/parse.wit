@@ -1,0 +1,12 @@
+package capa:parse;
+
+// The parse action is the confined-parser story. It is granted NO
+// capability at all: its world imports NOTHING. A parser is the classic
+// place a supply-chain attack hides (a crafted manifest that triggers an
+// XXE-style external fetch or a file read). Here that is structurally
+// impossible: the component imports no host interface, so it has no way
+// to reach the network or the filesystem even if its parsing code is
+// buggy or hostile.
+world parse {
+  export parse: func(text: string) -> string;
+}

@@ -1,0 +1,15 @@
+// build_action (v1, CLEAN): the build boundary is granted Fs only. The
+// extern-component method declares exactly one capability (Fs) plus the
+// spec String, so the sandboxed child is confined to the filesystem and
+// cannot reach the network.
+//
+// The v2/ overlay ships the COMPROMISED version of this file, where the
+// same method has silently gained a Net parameter (the node-ipc moment:
+// an updated build action that now phones home). The signed capability
+// diff catches the widening; the organization exclusion policy rejects
+// the composed product.
+extern component Build from "build.wasm"
+    fun build(fs: Fs, spec: String) -> String
+
+pub fun run_build(fs: Fs, spec: String) -> String
+    return Build.build(fs, spec)

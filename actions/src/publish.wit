@@ -1,0 +1,12 @@
+package capa:host;
+
+// The publish action is granted Net only. Same shape as fetch: it holds
+// the caller's attenuated Net and cannot widen it.
+interface net {
+  allows: func(handle: u32, host: string) -> bool;
+}
+
+world publish {
+  import net;
+  export publish: func(artifact: string) -> string;
+}

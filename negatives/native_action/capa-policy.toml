@@ -1,0 +1,9 @@
+# The product authority must stay within {Net, Fs, Stdio}. Because
+# legacy_action is unresolvable, the product's authority is UNKNOWN and
+# this policy cannot be proven, so it FAILS CLOSED with an
+# authority_unknown verdict (distinct from a concrete violation).
+[[policy]]
+id = "product-authority"
+name = "product authority subset-or-equal {Net, Fs, Stdio}"
+kind = "product-subset"
+max = ["Net", "Fs", "Stdio"]

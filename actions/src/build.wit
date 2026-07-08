@@ -1,0 +1,15 @@
+package capa:host;
+
+// The build action is granted Fs only. Its component imports the host
+// fs interface (the allows query) and exports the build method. It has
+// NO net import, so even if it were compromised it could not open a
+// socket: the host would refuse to link a net interface it was not
+// granted.
+interface fs {
+  allows: func(handle: u32, path: string) -> bool;
+}
+
+world build {
+  import fs;
+  export build: func(spec: string) -> string;
+}

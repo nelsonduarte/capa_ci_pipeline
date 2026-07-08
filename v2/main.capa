@@ -1,0 +1,44 @@
+// capa_ci_pipeline orchestrator.
+//
+// It runs the four third-party actions in sequence: fetch -> parse ->
+// build -> publish. Each action is a sandbox-confined typed foreign Wasm
+// component. The orchestrator holds Net, Fs and Stdio, but it hands each
+// action ONLY the capability that action's boundary declares:
+//
+//   - fetch   gets Net, attenuated to the registry host
+//   - parse   gets NOTHING (a confined parser)
+//   - build   gets Fs
+//   - publish gets Net, attenuated to the registry host
+//
+// The pure pipeline_core library provides all the formatting and
+// ordering logic and holds no authority at all.
+
+import pipeline_core.core
+import fetch_action.api as fetch
+import parse_action.api as parse
+import build_action.api as build
+import publish_action.api as publish
+
+fun main(net: Net, fs: Fs, stdio: Stdio)
+    // Least authority: the fetch and publish actions only ever talk to
+    // the registry, so narrow Net to that host before handing it over.
+    let registry = net.restrict_to("registry.internal")
+
+    stdio.println(core.banner(core.stage_name(0)))
+    let src = fetch.run_fetch(registry, "app-1.2.3.tar")
+    stdio.println("  fetched: ${src}")
+
+    stdio.println(core.banner(core.stage_name(1)))
+    let spec = parse.run_parse(src)
+    stdio.println("  spec: ${spec}")
+
+    stdio.println(core.banner(core.stage_name(2)))
+    let artifact = build.run_build(registry, fs, spec)
+    stdio.println("  artifact: ${artifact}")
+
+    stdio.println(core.banner(core.stage_name(3)))
+    let receipt = publish.run_publish(registry, artifact)
+    stdio.println("  published: ${receipt}")
+
+    let ok = core.succeeded(receipt)
+    stdio.println("pipeline ok: ${ok}")

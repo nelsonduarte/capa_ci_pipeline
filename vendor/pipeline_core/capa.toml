@@ -1,0 +1,10 @@
+# pipeline_core: the PURE core library of the CI product.
+#
+# It holds the pipeline/DAG configuration and formatting logic: ordering
+# stages, building banners, combining stage outputs. It takes NO
+# capability parameter anywhere and calls no foreign component, so its
+# composed authority is the empty set and the organization purity policy
+# proves it clean.
+[package]
+name = "pipeline_core"
+version = "1.0.0"

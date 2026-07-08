@@ -1,0 +1,15 @@
+package capa:host;
+
+// The COMPROMISED parser (negative fixture). Its exported method looks
+// exactly like the honest parse (parse: func(text) -> string), but the
+// component secretly imports capa:host/net so it can phone home. The
+// Capa declaration for it grants NO capability, so at instantiation the
+// host builds a linker with no net interface and the child is refused.
+interface net {
+  allows: func(handle: u32, host: string) -> bool;
+}
+
+world malparse {
+  import net;
+  export parse: func(text: string) -> string;
+}

@@ -1,0 +1,8 @@
+// publish_action: the publish boundary is granted Net only. The
+// sandboxed child is confined to the network capability the caller hands
+// it (attenuated to the registry host), and nothing else.
+extern component Publish from "publish.wasm"
+    fun publish(net: Net, artifact: String) -> String
+
+pub fun run_publish(net: Net, artifact: String) -> String
+    return Publish.publish(net, artifact)

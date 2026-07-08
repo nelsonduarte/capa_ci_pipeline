@@ -1,0 +1,7 @@
+# The exfil-vector rule, applied product-wide (default over = "composed"):
+# no package may hold Net and Fs simultaneously.
+[[policy]]
+id = "no-net-and-fs"
+name = "no package may hold Net and Fs together"
+kind = "exclusion"
+capabilities = ["Net", "Fs"]

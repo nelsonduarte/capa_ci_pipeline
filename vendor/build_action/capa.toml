@@ -1,0 +1,6 @@
+# build_action: the boundary around the third-party "build" action.
+# It is granted Fs only (to read the checkout and write build outputs).
+# It must never hold Net: a build step has no business phoning home.
+[package]
+name = "build_action"
+version = "1.0.0"

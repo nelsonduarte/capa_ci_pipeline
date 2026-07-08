@@ -1,0 +1,6 @@
+# transient wasm-tools build intermediates (build_fixtures.sh cleans them,
+# but guard against an interrupted run)
+actions/*.core.wasm
+actions/*.embed.wasm
+__pycache__/
+*.pyc

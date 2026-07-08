@@ -1,0 +1,5 @@
+# parse_action: the boundary around the third-party "parse" action.
+# A parser needs NO capability at all (the confined-parser story).
+[package]
+name = "parse_action"
+version = "1.0.0"
