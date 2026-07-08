@@ -125,25 +125,24 @@ enforcement_posture: wasm-sandbox
 product composed: ['Fs', 'Net', 'Stdio']   authority_unknown: False
 
 capa_ci_pipeline   attributed=['Fs','Net','Stdio']  composed=['Fs','Net','Stdio']
-build_action       attributed=['Fs']                composed=['Fs','Net']
-fetch_action       attributed=['Net']               composed=['Fs','Net']
-parse_action       attributed=[]                    composed=['Fs','Net']
+build_action       attributed=['Fs']                composed=['Fs']
+fetch_action       attributed=['Net']               composed=['Net']
+parse_action       attributed=[]                    composed=[]
 pipeline_core      attributed=[]                    composed=[]
-publish_action     attributed=['Net']               composed=['Fs','Net']
+publish_action     attributed=['Net']               composed=['Net']
 ```
 
 `pipeline_core` is a zero-capability node, exactly as a pure library
-should be. Each action boundary carries a reason string explaining the
-bounded posture, e.g. for `fetch_action`:
+should be. Each foreign-action boundary composes as a bounded node of
+exactly the capabilities that action invokes: `parse_action` reaches no
+capability at all, `build_action` only Fs, fetch/publish only Net. Each
+boundary also carries a reason string explaining the bounded posture,
+e.g. for `fetch_action`:
 
 > a function in this package invokes a typed foreign component; under the
 > Wasm-sandbox enforcement posture the child is instantiated with a
 > restricted linker binding ONLY its declared capabilities, so the
 > boundary composes as a BOUNDED node of ['Net'] (cap-set host-enforced)
-
-Note the `composed` column shows `['Fs','Net']` on every action, not each
-action's own single cap. That is a known compiler over-approximation
-(the `attributed` column IS precise); see `DOGFOOD_FINDINGS.md` F-1.
 
 ### #6 Capability policies (clean product passes)
 
@@ -152,9 +151,11 @@ python -m capa --check-policies --wasm main.capa
 ```
 
 `capa-policy.toml` declares four organization rules: the core library is
-pure; the build action must not hold Net AND Fs; no action may spawn a
-process; and product authority must stay within {Net, Fs, Stdio}. On the
-clean v1 product they all hold:
+pure; the parse action must not hold Net (the confined-parser rule); the
+build action must not hold Net AND Fs (the exfil-vector rule); and
+product authority must stay within {Net, Fs, Stdio}. Every rule is
+evaluated over the precise composed capability graph. On the clean v1
+product they all hold:
 
 ```
 capa: --check-policies: OK - every declared compliance policy holds.
@@ -223,7 +224,7 @@ The exfil-vector exclusion fires: the build action now holds Net AND Fs.
 ```
 capa: --check-policies: FAILED - 1 policy(ies), 1 violation(s):
   policy 'build-no-net-and-fs' (kind exclusion):
-    - [violation] package 'build_action' holds all of ['Fs', 'Net'] simultaneously (attributed capabilities), which policy 'build-no-net-and-fs' forbids
+    - [violation] package 'build_action' holds all of ['Fs', 'Net'] simultaneously (composed capabilities), which policy 'build-no-net-and-fs' forbids
 ```
 
 (exit 1)
@@ -293,17 +294,23 @@ capa: --check-policies: FAILED - 1 policy(ies), 1 violation(s):
 ## Notes and honesty
 
 Building this demo surfaced two compiler findings, recorded in
-`DOGFOOD_FINDINGS.md`. The important one (F-1) is that the composed SBOM
-attributes a product-wide UNION of foreign-component capabilities to
-every foreign-calling package, which over-reports per-action authority.
-It is sound (it never under-reports), but it blocked one intended policy
-("the parse action must not hold Net") from being demonstrated over the
-composed graph. That policy was replaced by a working precise one, and
-the parser-confinement guarantee is instead shown structurally at runtime
-(N1) and by construction (the parse boundary declares no capability). The
-exfil-vector exclusion uses `over = "attributed"` to read the precise,
-per-package caps, which is why it passes clean on v1 and correctly fails
-on the compromised v2.
+`DOGFOOD_FINDINGS.md`. Both are now FIXED upstream (compiler main
+c2011ae, PR #75) and the demo uses the intended forms:
+
+- F-1: the composed SBOM used to attribute a product-wide UNION of
+  foreign-component capabilities to every foreign-calling package
+  (over-reporting per-action authority). It now attributes them PRECISELY
+  per package, so the "parse action must not hold Net" policy is
+  evaluated over the real composed graph (parse composes with no
+  capability) rather than needing a workaround. The exfil-vector
+  exclusion likewise reads each package's precise composed caps.
+- F-2: `--check-capabilities` now honors the `--wasm` sandbox posture,
+  consistent with the other subcommands.
+
+Dogfooding this demo is what caught both bugs; the findings file keeps
+the full record as provenance.
+
+Every command and output above was run against the compiler and
 
 Every command and output above was run against the compiler and
 transcribed, not invented.

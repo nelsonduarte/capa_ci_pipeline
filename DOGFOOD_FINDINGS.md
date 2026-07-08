@@ -8,15 +8,26 @@ expected behavior, and whether it is a COMPILER issue (for triage) or a
 DEMO authoring mistake (fixed here). The compiler repo was not modified.
 
 Summary: 2 compiler findings (1 medium, 1 low), plus the ordinary
-demo-authoring fixes. No finding is a soundness hole; both compiler
-findings fail SAFE (they over-report authority or fail closed, never
-under-report). One of them (F-1) BLOCKS one of the four intended
-per-action policies from being demonstrated over the composed graph; the
-demo works around it and the blocked policy is called out explicitly.
+demo-authoring fixes. BOTH compiler findings are now FIXED upstream
+(compiler main c2011ae, PR #75) and the demo uses the intended forms;
+their records are kept below with status RESOLVED as provenance that
+dogfooding caught real bugs. Neither was a soundness hole; both failed
+SAFE (they over-reported authority or failed closed, never
+under-reported).
 
 ---
 
-## F-1 (COMPILER, medium): composed SBOM attributes a product-wide UNION of foreign-component caps to every foreign-calling package
+## F-1 (COMPILER, medium) [RESOLVED, fixed on compiler main c2011ae / PR #75]: composed SBOM attributed a product-wide UNION of foreign-component caps to every foreign-calling package
+
+STATUS: FIXED upstream. The composed SBOM now attributes foreign-action
+capabilities PRECISELY per package. Verified against compiler main
+c2011ae: `parse_action` (invoking the no-capability parse boundary) now
+composes as `[]`, `build_action` as `['Fs']`, fetch/publish as `['Net']`.
+The demo now uses the INTENDED composed-graph forms directly: the
+"parse action must not hold Net" `forbid-capability` policy is evaluated
+over the composed graph, and the exfil-vector exclusion uses the default
+`over = "composed"` (no `over = "attributed"` workaround). The original
+finding is preserved below for provenance.
 
 - Command:
   `python -m capa --compose-sbom --wasm main.capa`
@@ -57,9 +68,9 @@ demo works around it and the blocked policy is called out explicitly.
   `forbid-capability` policy "the parse action must not hold Net": over
   the composed view `parse_action` appears to hold Net, so the policy
   fires as a FALSE POSITIVE on the clean product.
-- Demo workaround:
+- Demo workaround (HISTORICAL, now reverted since the fix landed):
   1. The exfil-vector exclusion ("build action must not hold Net AND Fs")
-     is expressed with `over = "attributed"`, which reads each package's
+     was expressed with `over = "attributed"`, which reads each package's
      PRECISE attributed caps (`build_action` -> `['Fs']` in v1). This
      passes clean on v1 and correctly fails on the compromised v2 (where
      `build_action`'s attributed caps gain Net). So the headline rule is
@@ -77,7 +88,15 @@ demo works around it and the blocked policy is called out explicitly.
   `declared_capabilities` mapping, instead of the product-wide union; or
   add an `over = "attributed"` option to `forbid-capability` / `purity`.
 
-## F-2 (COMPILER, low): `--check-capabilities` ignores the `--wasm` sandbox posture
+## F-2 (COMPILER, low) [RESOLVED, fixed on compiler main c2011ae / PR #75]: `--check-capabilities` ignored the `--wasm` sandbox posture
+
+STATUS: FIXED upstream. Verified against compiler main c2011ae: with
+per-package ceilings re-added in a scratch copy (fetch max=["Net"], build
+max=["Fs"], parse pure=true), `python -m capa --check-capabilities --wasm
+main.capa` now reports "OK - every declared capability ceiling holds"
+(exit 0), consistent with the other subcommands. The demo does not ship
+`[capabilities]` ceilings (the organization `capa-policy.toml` expresses
+the limits instead), so no demo change was needed. Original finding below.
 
 - Command:
   `python -m capa --check-capabilities --wasm main.capa`
