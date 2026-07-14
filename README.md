@@ -311,6 +311,4 @@ Dogfooding this demo is what caught both bugs; the findings file keeps
 the full record as provenance.
 
 Every command and output above was run against the compiler and
-
-Every command and output above was run against the compiler and
 transcribed, not invented.
