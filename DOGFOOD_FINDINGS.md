@@ -1,7 +1,7 @@
 # Dogfooding findings
 
 Findings collected while building `capa_ci_pipeline` against the compiler
-at `~/Desktop/Capa_language` on `main` (feature arc: #1 composed SBOM, #2
+in a local checkout, on `main` (feature arc: #1 composed SBOM, #2
 signed capability diff, #4 typed foreign components, #6 capability
 policies). Each finding records the command, the input, observed vs
 expected behavior, and whether it is a COMPILER issue (for triage) or a
